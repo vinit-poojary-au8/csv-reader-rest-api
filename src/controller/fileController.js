@@ -1,15 +1,6 @@
 const fs = require('fs')
 const csv = require('fast-csv')
-const Pool = require('pg').Pool
 const middleware = require('../middleware/db')
-
-const pool = new Pool({
-	host: 'localhost',
-	user: 'postgres',
-	database: 'postgres',
-	password: '123',
-	port: 5432,
-})
 
 const uploadData = (req, res) => {
 	let csvData = []
