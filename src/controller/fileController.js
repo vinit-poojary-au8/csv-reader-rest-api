@@ -1,11 +1,12 @@
 const fs = require('fs')
 const csv = require('fast-csv')
 const Pool = require('pg').Pool
+const middleware = require('../middleware/db')
 
 const pool = new Pool({
 	host: 'localhost',
-	user: 'vinit',
-	database: 'csv-reader',
+	user: 'postgres',
+	database: 'postgres',
 	password: '123',
 	port: 5432,
 })
@@ -26,49 +27,12 @@ const uploadData = (req, res) => {
 		.on('end', (rowCount) => {
 			csvData.shift()
 
-			const query =
-				'INSERT INTO category (Region, Country, Item Type, Sales Channel,Order Priority,Order Date,Order ID,Ship Date,Units Sold,Unit Price,Unit Cost,Total Revenue,Total Cost,Total Profit) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14,)'
-
-			pool.connect((err, client, done) => {
-				if (err) throw err
-
-				try {
-					csvData.forEach((row) => {
-						client.query(query, row, (err, res) => {
-							if (err) {
-								console.log(
-									err.stack
-								)
-							} else {
-								console.log(
-									'inserted ' +
-										res.rowCount +
-										' row:',
-									row
-								)
-							}
-						})
-					})
-				} finally {
-					res.send(
-						`Successfully added Total ${rowCount} rows in database`
-					)
-					console.log(`${rowCount} rows`)
-					done()
-				}
-			})
+			middleware.upload(req, res, csvData, rowCount)
 		})
 }
 
 const getData = (req, res) => {
-	const query = 'SELECT * FROM users'
-
-	pool.query(query, (error, results) => {
-		if (error) {
-			throw error
-		}
-		res.status(200).json(results.rows)
-	})
+	middleware.data(req, res)
 }
 
 module.exports = {
